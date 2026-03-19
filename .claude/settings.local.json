@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls E:/Hackathon_1/chapter*.md)"
+    ]
+  }
+}
