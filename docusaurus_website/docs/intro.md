@@ -1,47 +1,70 @@
 ---
-sidebar_position: 1
+sidebar_position: 0
+slug: /intro
 ---
 
-# Tutorial Intro
+# Physical AI & Humanoid Robotics
 
-Let's discover **Docusaurus in less than 5 minutes**.
+**A complete textbook for building intelligent physical systems — from first principles to a fully autonomous humanoid.**
 
-## Getting Started
+> Panaversity Hackathon I | Built with Docusaurus + RAG Chatbot
 
-Get started by **creating a new site**.
+---
 
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
+## What You Will Learn
 
-### What you'll need
+This textbook takes you from zero to building a fully autonomous humanoid robot that can:
 
-- [Node.js](https://nodejs.org/en/download/) version 20.0 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
+- Understand voice commands using Whisper + LLMs
+- Navigate physical environments using ROS 2 + Nav2
+- Grasp and manipulate objects using MoveIt2
+- Learn skills in simulation and transfer them to real hardware
 
-## Generate a new site
+No prior robotics experience required — just Python and curiosity.
 
-Generate a new Docusaurus site using the **classic template**.
+---
 
-The classic template will automatically be added to your project after you run the command:
+## Book Modules
 
-```bash
-npm init docusaurus@latest my-website classic
+| Module | Chapters | Topics |
+|--------|----------|--------|
+| **Intro to Physical AI** | Ch 1–2 | Embodied intelligence, humanoid landscape |
+| **ROS 2 Fundamentals** | Ch 3–5 | Nodes, packages, URDF |
+| **Simulation** | Ch 6–7 | Gazebo, Unity Robotics Hub |
+| **NVIDIA Isaac Platform** | Ch 8–10 | Isaac Sim, Isaac ROS, Sim-to-Real |
+| **Humanoid Robot Dev** | Ch 11–12 | Kinematics, manipulation and grasping |
+| **Conversational Robotics** | Ch 13 | VLA models, voice to action |
+| **Capstone Project** | Ch 14 | Full autonomous humanoid pipeline |
+
+---
+
+## How to Use This Book
+
+1. **Read sequentially** — each chapter builds on the last
+2. **Run the code** — every chapter includes working Python examples
+3. **Ask Robo** — use the chatbot (bottom-right) to ask questions about any chapter
+
+---
+
+## Tech Stack Covered
+
+```
+ROS 2 Humble/Jazzy    →  Robot middleware
+Gazebo / Unity        →  Simulation
+NVIDIA Isaac Sim      →  GPU-accelerated simulation + RL
+MoveIt2               →  Motion planning
+Nav2                  →  Navigation
+Whisper + LLMs        →  Conversational AI
+OpenAI Agents SDK     →  RAG chatbot
 ```
 
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
+---
 
-The command also installs all necessary dependencies you need to run Docusaurus.
+## Prerequisites
 
-## Start your site
+- Python 3.10+ (intermediate level)
+- Basic Linux/terminal comfort
+- Ubuntu 22.04 (or WSL2) recommended
+- GPU optional but helpful for Isaac Sim chapters
 
-Run the development server:
-
-```bash
-cd my-website
-npm run start
-```
-
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
-
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
-
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
+Ready? Start with **[Chapter 1: What is Physical AI?](./chapter-01-what-is-physical-ai)**
