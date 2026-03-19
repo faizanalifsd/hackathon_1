@@ -1,8 +1,9 @@
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
+groq==0.11.0
 openai==1.51.0
-openai-agents==0.0.6
 qdrant-client==1.11.1
+fastembed==0.3.6
 asyncpg==0.29.0
 python-dotenv==1.0.1
 pydantic==2.9.2
