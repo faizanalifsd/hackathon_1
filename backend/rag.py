@@ -1,17 +1,21 @@
 """
 rag.py — RAG pipeline using:
-  Embeddings : Jina AI API (free, 768-dim, no local ML packages)
+  Embeddings : Jina AI API (free, 768-dim)
   LLM Primary: Groq llama-3.3-70b-versatile
   LLM Fallback: OpenRouter deepseek/deepseek-r1-distill-llama-70b
 """
 import os
 import time
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from qdrant_client import QdrantClient
 from groq import Groq
 from openai import OpenAI
 from embeddings import embed_one
 
-# ── Clients ──────────────────────────────────────────────────────────────────
+# ── Clients (initialized after load_dotenv) ──────────────────────────────────
 qdrant = QdrantClient(
     url=os.getenv("QDRANT_URL"),
     api_key=os.getenv("QDRANT_API_KEY"),
@@ -65,33 +69,29 @@ def _call_openrouter(context: str, question: str) -> str:
 async def answer_question(question: str, selected_text: str = "") -> dict:
     query = f"{selected_text}\n\n{question}".strip() if selected_text else question
 
-    # Embed query
     try:
         query_vector = embed_one(query)
     except Exception as e:
         return {"answer": f"Embedding error: {str(e)}"}
 
-    # Search Qdrant
     try:
-        results = qdrant.search(
+        results = qdrant.query_points(
             collection_name=COLLECTION,
-            query_vector=query_vector,
+            query=query_vector,
             limit=3,
             score_threshold=0.6,
-        )
+        ).points
     except Exception as e:
         return {"answer": "I couldn't connect to the knowledge base. Please try again shortly."}
 
     if not results:
         return {"answer": "I couldn't find that in the book. Try rephrasing or browse a specific chapter."}
 
-    # Build context
     context = "\n\n---\n\n".join([
         f"[{r.payload.get('chapter', 'Unknown Chapter')}]\n{r.payload['text']}"
         for r in results
     ])
 
-    # Try Groq → fallback OpenRouter
     try:
         return {"answer": _call_groq(context, question)}
     except Exception as groq_err:
@@ -99,5 +99,5 @@ async def answer_question(question: str, selected_text: str = "") -> dict:
         time.sleep(2)
         try:
             return {"answer": _call_openrouter(context, question)}
-        except Exception as or_err:
-            return {"answer": f"Both LLM providers failed. Please try again shortly."}
+        except Exception:
+            return {"answer": "Both LLM providers failed. Please try again shortly."}

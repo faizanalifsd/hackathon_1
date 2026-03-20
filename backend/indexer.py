@@ -30,8 +30,10 @@ def chunk_text(text: str, size: int = CHUNK_SIZE) -> list[str]:
 
 
 def index_all_chapters():
-    # Recreate collection
-    qdrant.recreate_collection(
+    # Recreate collection (delete if exists, then create fresh)
+    if qdrant.collection_exists(COLLECTION):
+        qdrant.delete_collection(COLLECTION)
+    qdrant.create_collection(
         collection_name=COLLECTION,
         vectors_config=VectorParams(size=VECTOR_DIM, distance=Distance.COSINE),
     )

@@ -7,7 +7,6 @@ Get key at: https://jina.ai (sign up → API key)
 import os
 import requests
 
-JINA_API_KEY = os.getenv("JINA_API_KEY")
 JINA_MODEL = "jina-embeddings-v2-base-en"
 VECTOR_DIM = 768
 
@@ -17,7 +16,7 @@ def embed(texts: list[str]) -> list[list[float]]:
     response = requests.post(
         "https://api.jina.ai/v1/embeddings",
         headers={
-            "Authorization": f"Bearer {JINA_API_KEY}",
+            "Authorization": f"Bearer {os.getenv('JINA_API_KEY')}",
             "Content-Type": "application/json",
         },
         json={"model": JINA_MODEL, "input": texts},
