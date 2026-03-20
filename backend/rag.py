@@ -1,32 +1,26 @@
 """
 rag.py — RAG pipeline using:
-  Embeddings : fastembed (local, free, no API key)
+  Embeddings : Jina AI API (free, 768-dim, no local ML packages)
   LLM Primary: Groq llama-3.3-70b-versatile
   LLM Fallback: OpenRouter deepseek/deepseek-r1-distill-llama-70b
 """
 import os
 import time
 from qdrant_client import QdrantClient
-from qdrant_client.models import models as qmodels
-from fastembed import TextEmbedding
 from groq import Groq
-from openai import OpenAI  # OpenRouter uses OpenAI-compatible SDK
+from openai import OpenAI
+from embeddings import embed_one
 
 # ── Clients ──────────────────────────────────────────────────────────────────
 qdrant = QdrantClient(
     url=os.getenv("QDRANT_URL"),
     api_key=os.getenv("QDRANT_API_KEY"),
 )
-
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-
 openrouter_client = OpenAI(
     api_key=os.getenv("OPENROUTER_API_KEY"),
     base_url="https://openrouter.ai/api/v1",
 )
-
-# Load embedding model once at startup (BAAI/bge-small-en-v1.5, 384-dim, ~25 MB)
-embedder = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
 
 COLLECTION = "physical_ai_book"
 
@@ -40,12 +34,6 @@ Rules:
 - Use clear, encouraging language for learners.
 - End every response with: "Want me to explain [related concept]?"
 """
-
-
-def _embed(text: str) -> list[float]:
-    """Embed a single string using fastembed."""
-    vectors = list(embedder.embed([text]))
-    return vectors[0].tolist()
 
 
 def _call_groq(context: str, question: str) -> str:
@@ -75,12 +63,11 @@ def _call_openrouter(context: str, question: str) -> str:
 
 
 async def answer_question(question: str, selected_text: str = "") -> dict:
-    # Build query
     query = f"{selected_text}\n\n{question}".strip() if selected_text else question
 
     # Embed query
     try:
-        query_vector = _embed(query)
+        query_vector = embed_one(query)
     except Exception as e:
         return {"answer": f"Embedding error: {str(e)}"}
 
@@ -104,15 +91,13 @@ async def answer_question(question: str, selected_text: str = "") -> dict:
         for r in results
     ])
 
-    # Try Groq first, fall back to OpenRouter
+    # Try Groq → fallback OpenRouter
     try:
-        answer = _call_groq(context, question)
-        return {"answer": answer}
+        return {"answer": _call_groq(context, question)}
     except Exception as groq_err:
         print(f"Groq failed: {groq_err} — switching to OpenRouter")
         time.sleep(2)
         try:
-            answer = _call_openrouter(context, question)
-            return {"answer": answer}
+            return {"answer": _call_openrouter(context, question)}
         except Exception as or_err:
-            return {"answer": f"Both LLM providers failed. Groq: {groq_err} | OpenRouter: {or_err}"}
+            return {"answer": f"Both LLM providers failed. Please try again shortly."}

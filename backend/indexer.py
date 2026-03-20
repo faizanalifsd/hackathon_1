@@ -1,15 +1,15 @@
 """
-indexer.py — Chunk all 14 chapters and upload to Qdrant using fastembed.
-No API key needed for embeddings (runs locally).
+indexer.py — Chunk all 14 chapters and upload to Qdrant.
+Uses Jina AI embeddings API (free, 768-dim, works on any Python version).
 
-Run once:
+Run once after chapters are written:
     python indexer.py
 """
 import os
 import glob
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
-from fastembed import TextEmbedding
+from embeddings import embed, VECTOR_DIM
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -19,12 +19,8 @@ qdrant = QdrantClient(
     api_key=os.getenv("QDRANT_API_KEY"),
 )
 
-# BAAI/bge-small-en-v1.5 → 384 dimensions, ~25 MB, runs on CPU
-embedder = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
-
 COLLECTION = "physical_ai_book"
-VECTOR_DIM = 384       # matches BAAI/bge-small-en-v1.5
-CHUNK_SIZE = 500       # words per chunk
+CHUNK_SIZE = 500
 DOCS_PATH = "../docusaurus_website/docs/*.md"
 
 
@@ -34,7 +30,7 @@ def chunk_text(text: str, size: int = CHUNK_SIZE) -> list[str]:
 
 
 def index_all_chapters():
-    # Recreate collection with correct vector size
+    # Recreate collection
     qdrant.recreate_collection(
         collection_name=COLLECTION,
         vectors_config=VectorParams(size=VECTOR_DIM, distance=Distance.COSINE),
@@ -60,25 +56,24 @@ def index_all_chapters():
                 all_chunks.append(chunk)
                 chunk_meta.append({"chapter": chapter_name, "chunk_index": i, "text": chunk})
 
-    # Batch embed all chunks at once (fastembed is fast in batch mode)
-    print(f"\nEmbedding {len(all_chunks)} chunks (this may take a minute)...")
-    embeddings = list(embedder.embed(all_chunks))
+    # Embed in batches of 20 (Jina API limit per request)
+    print(f"\nEmbedding {len(all_chunks)} chunks via Jina AI...")
+    all_vectors = []
+    batch_size = 20
+    for i in range(0, len(all_chunks), batch_size):
+        batch = all_chunks[i:i + batch_size]
+        vectors = embed(batch)
+        all_vectors.extend(vectors)
+        print(f"  Embedded {min(i + batch_size, len(all_chunks))}/{len(all_chunks)}")
 
-    # Build Qdrant points
+    # Build and upload Qdrant points
     points = [
-        PointStruct(
-            id=i,
-            vector=embeddings[i].tolist(),
-            payload=chunk_meta[i],
-        )
+        PointStruct(id=i, vector=all_vectors[i], payload=chunk_meta[i])
         for i in range(len(all_chunks))
     ]
 
-    # Upload in batches of 100
-    batch_size = 100
-    for i in range(0, len(points), batch_size):
-        qdrant.upsert(collection_name=COLLECTION, points=points[i:i + batch_size])
-        print(f"  Uploaded {min(i + batch_size, len(points))}/{len(points)} points")
+    for i in range(0, len(points), 100):
+        qdrant.upsert(collection_name=COLLECTION, points=points[i:i + 100])
 
     print(f"\nDone! Indexed {len(points)} chunks from {len(chapter_files)} chapters.")
 
