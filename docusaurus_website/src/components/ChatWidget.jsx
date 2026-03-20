@@ -5,7 +5,7 @@ import "../../src/css/chat.css";
 const BACKEND_URL =
   process.env.NODE_ENV === "production"
     ? "https://physical-ai-book-api.onrender.com"
-    : "http://localhost:8000";
+    : "http://localhost:8002";
 
 const WELCOME_MSG = {
   role: "bot",
