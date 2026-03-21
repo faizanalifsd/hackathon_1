@@ -27,10 +27,10 @@ The **Denavit-Hartenberg (DH) convention** is a systematic method for assigning 
 
 | Parameter | Symbol | Description |
 |---|---|---|
-| Link length | `a` | Distance along x_i from z_{i-1} to z_i |
-| Link twist | `α` | Angle about x_i from z_{i-1} to z_i |
-| Link offset | `d` | Distance along z_{i-1} from x_{i-1} to x_i |
-| Joint angle | `θ` | Angle about z_{i-1} from x_{i-1} to x_i (variable for revolute joints) |
+| Link length | `a` | Distance along x\_i from z\_\{i-1\} to z\_i |
+| Link twist | `α` | Angle about x\_i from z\_\{i-1\} to z\_i |
+| Link offset | `d` | Distance along z\_\{i-1\} from x\_\{i-1\} to x\_i |
+| Joint angle | `θ` | Angle about z\_\{i-1\} from x\_\{i-1\} to x\_i (variable for revolute joints) |
 
 The 4×4 homogeneous transformation from frame `i-1` to frame `i` is:
 
