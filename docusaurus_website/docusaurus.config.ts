@@ -120,7 +120,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Physical AI & Humanoid Robotics Textbook — Panaversity Hackathon I. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Physical AI & Humanoid Robotics Textbook — Built by Faizan | Hackathon 1. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,
